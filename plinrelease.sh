@@ -24,6 +24,8 @@ SETUP="setup.sh"
 SIDE="simpleide.sh"
 SETUPSH="./release/linux/${SETUP}"
 SIDERSH="./release/linux/${SIDE}"
+SIMPLE_LIBRARIES="https://github.com/parallaxinc/Simple-Libraries.git"
+PROP_LOADER="https://github.com/parallaxinc/PropLoader.git"
 
 #
 # we provide SimpleIDE, PropellerGCC, ctags, qt libs, spin source, and workspace in this packager
@@ -33,7 +35,7 @@ LIBAUDIO="/usr/lib/libaudio.so.2"
 LIBAUDIO2="/usr/lib/x86_64-linux-gnu/libaudio.so.2"
 SPINLIB="./spin"
 
-which qmake
+QMAKE=$(which qmake)
 if [ $? -ne 0 ]
 then
     echo "Qt must be installed. Please install Qt5.4 from here:"
@@ -41,27 +43,27 @@ then
     exit 1
 fi
 
-QMAKE=`which qmake`
-# QT5QMAKE=`echo ${QMAKE} | grep -i 'Qt5'`
-# grep -i 'Qt5' ${QMAKE}
-# if test $? != 0 ; then
-#     echo "The qmake program must be Qt5.4 or higher vintage."
-#     echo "Please adjust PATH to include a Qt5 build if necessary."
-#     echo "Please install Qt5.4 from here if you don't have it already:"
-#     echo "download.qt.io./official_releases/qt/5.4/5.4.2"
-#     exit 1
-# fi
+QMAKE_VERSION=$("${QMAKE}" -query QMAKE_VERSION)
+if dpkg --compare-versions "${QMAKE_VERSION}" "lt" "3.1"; then
+    echo "The qmake program must be 3.1 or higher vintage."
+    echo "Are you sure you have Qt5 installed?"
+    echo "Please adjust PATH to include a Qt5 build if necessary."
+    echo "Please install Qt5:"
+    echo "sudo apt update && sudo apt install -y qtbase5-dev qt5-qmake"
+    echo "Or download it from here: https://download.qt.io./archive/qt/5.15"
+    exit 1
+fi
 
 CLEAN=$1
 
 if [ ! -e ./Workspace ]
 then
     echo "SimpleIDE Workspace not found. Adding:"
-    git clone https://github.com/parallaxinc/propsideworkspace/ Workspace
+    git clone "${SIMPLE_LIBRARIES}" Workspace
     if [ $? -ne 0 ]
     then
         echo "SimpleIDE Workspace git failed. Add it with this command:"
-        echo "git clone https://github.com/parallaxinc/propsideworkspace/ Workspace"
+        echo "git clone "${SIMPLE_LIBRARIES}" Workspace"
         exit 1
     fi
     cd Workspace
@@ -204,23 +206,11 @@ if [ ${LIBAUDIO}X != X ]; then
    fi
 fi
 
-#
-# Quazip no longer needed
-#
-#MYLDD=`ldd ${BUILD}/${NAME} | grep quazip | awk '{print $3}'`
-#QUAZIP=`echo $MYLDD`
-#
-#cp ${QUAZIP} ${VERSION}/bin
-#if test $? != 0; then
-#   echo "copy ${QUAZIP} failed."
-#   exit 1
-#fi
-
 export PATH=$PROPGCC/bin:$PATH
 
 if [ ! -e $WXLOADER ] ; then
     echo "proploader not found. Adding:"
-    git clone https://github.com/dbetz/proploader/ ../proploader
+    git clone "${PROP_LOADER}" ../proploader
     pushd `pwd`
     cd ../proploader
     export OS=linux
@@ -315,9 +305,9 @@ if test $? != 0; then
    echo "copy workspace failed."
    exit 1
 fi
-rm -rf ${VERSION}/parallax/Workspace/.hg
+rm -rf ${VERSION}/parallax/Workspace/.git
 if test $? != 0; then
-   echo "remove workspace .hg tracking failed."
+   echo "remove Workspace/.git tracking failed."
    exit 1
 fi
 
