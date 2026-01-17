@@ -42,15 +42,15 @@ then
 fi
 
 QMAKE=`which qmake`
-QT5QMAKE=`echo ${QMAKE} | grep -i 'Qt5'`
-grep -i 'Qt5' ${QMAKE}
-if test $? != 0 ; then
-    echo "The qmake program must be Qt5.4 or higher vintage."
-    echo "Please adjust PATH to include a Qt5 build if necessary."
-    echo "Please install Qt5.4 from here if you don't have it already:"
-    echo "download.qt.io./official_releases/qt/5.4/5.4.2"
-    exit 1
-fi
+# QT5QMAKE=`echo ${QMAKE} | grep -i 'Qt5'`
+# grep -i 'Qt5' ${QMAKE}
+# if test $? != 0 ; then
+#     echo "The qmake program must be Qt5.4 or higher vintage."
+#     echo "Please adjust PATH to include a Qt5 build if necessary."
+#     echo "Please install Qt5.4 from here if you don't have it already:"
+#     echo "download.qt.io./official_releases/qt/5.4/5.4.2"
+#     exit 1
+# fi
 
 CLEAN=$1
 
