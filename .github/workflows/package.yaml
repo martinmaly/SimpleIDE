@@ -1,0 +1,42 @@
+name: Build SimpleIDE
+on:
+  push:
+    branches:
+      - main
+      - master
+      - qt5side
+    pull_request:
+      branches:
+        - main
+        - master
+        - qt5side
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install PropGCC
+        run: |
+          DIR=$(mktemp -d propgcc-XXXX)
+          cd ${DIR}
+          curl --silent -o simpleide.deb 'https://www.parallax.com/package/simpleide-software-for-linux-propeller-c/?wpdmdl=3349&refresh=696bf3f98722b1768682489&ind=1600713241394&filename=simple-ide_1-0-1-rc1_amd64.deb'
+          ar x simpleide.deb
+          sudo tar -C / -xzf data.tar.gz
+          cd ..
+          rm -rf ${DIR}
+        shell: bash
+
+      - name: Set up Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '5.15.*'
+          host: 'linux'
+          target: 'desktop'
+          install-deps: true
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Build SimpleIDE
+        run: |
+          ./plinrelease.sh && ls -al SimpleIDE-*.tar.bz2
+        shell: bash

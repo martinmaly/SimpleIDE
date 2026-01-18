@@ -209,14 +209,13 @@ fi
 export PATH=$PROPGCC/bin:$PATH
 
 if [ ! -e $WXLOADER ] ; then
-    echo "proploader not found. Adding:"
-    git clone "${PROP_LOADER}" ../proploader
-    pushd `pwd`
-    cd ../proploader
-    export OS=linux
-    make
-    popd
-    unset OS
+   echo "proploader not found. Adding:"
+   git clone "${PROP_LOADER}" ../proploader
+   make -C ../proploader OS=linux
+   if [ $? -ne 0 ]; then
+       echo "PropLoader build failed."
+       exit 1
+   fi
 fi
 
 cp ${WXLOADER} ${VERSION}/bin
